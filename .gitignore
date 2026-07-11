@@ -1,0 +1,8 @@
+# Sistem macOS
+.DS_Store
+Thumbs.db
+
+# Codebuff internal (AI agent tools — bukan bagian project)
+.agents/
+package-lock.json
+skills-lock.json
