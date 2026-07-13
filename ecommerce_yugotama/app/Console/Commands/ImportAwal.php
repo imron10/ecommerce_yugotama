@@ -2,10 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductPrice;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
@@ -15,7 +13,7 @@ class ImportAwal extends Command
                             {file : Path ke file CSV yang akan diimport}
                             {--dry-run : Proses tanpa menyimpan ke database, hanya validasi}';
 
-    protected $description = 'Import data produk dan harga dari file CSV (format: dari Affari)';
+    protected $description = 'Import data produk dari file CSV (format ekspor dari Affari) — 1 harga per produk';
 
     private int $imported = 0;
     private int $skipped = 0;
@@ -99,7 +97,7 @@ class ImportAwal extends Command
         $headers = array_map('strtolower', $headers);
 
         $expected = ['category_name', 'category_slug', 'product_sku', 'product_name',
-                      'product_description', 'product_unit', 'branch_code', 'price'];
+                      'product_description', 'product_unit', 'price'];
 
         $missing = array_diff($expected, $headers);
         if (! empty($missing)) {
@@ -128,18 +126,12 @@ class ImportAwal extends Command
         $productName  = trim($row['product_name']);
         $description  = trim($row['product_description'] ?? '');
         $unit         = trim($row['product_unit'] ?: 'pcs');
-        $branchCode   = trim($row['branch_code']);
-        $price        = str_replace(['.', ','], ['', '.'], trim($row['price']));
+        $rawPrice     = trim($row['price']);
+        $price        = str_replace(['.', ','], ['', '.'], $rawPrice);
 
         // Validasi harga
         if (! is_numeric($price) || (float) $price <= 0) {
-            throw new \Exception("Harga tidak valid: {$row['price']}");
-        }
-
-        // Validasi cabang
-        $branch = Branch::where('code', $branchCode)->first();
-        if (! $branch) {
-            throw new \Exception("Cabang dengan kode '{$branchCode}' tidak ditemukan. Seed cabang dulu: php artisan db:seed --class=BranchSeeder");
+            throw new \Exception("Harga tidak valid: {$rawPrice}");
         }
 
         if ($dryRun) {
@@ -158,7 +150,7 @@ class ImportAwal extends Command
             ]
         );
 
-        // 2. Cari atau buat produk
+        // 2. Cari atau buat produk dengan harga langsung
         $product = Product::firstOrCreate(
             ['sku' => $productSku],
             [
@@ -168,22 +160,12 @@ class ImportAwal extends Command
                 'sku' => $productSku,
                 'description' => $description,
                 'unit' => $unit,
+                'price' => (float) $price,
                 'is_active' => true,
             ]
         );
 
-        // 3. Buat harga per cabang
-        $priceResult = ProductPrice::firstOrCreate(
-            [
-                'product_id' => $product->id,
-                'branch_id' => $branch->id,
-            ],
-            [
-                'price' => (float) $price,
-            ]
-        );
-
-        if ($priceResult->wasRecentlyCreated) {
+        if ($product->wasRecentlyCreated) {
             $this->imported++;
         } else {
             $this->skipped++;

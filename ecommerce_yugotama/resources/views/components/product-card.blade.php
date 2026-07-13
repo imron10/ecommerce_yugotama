@@ -1,6 +1,5 @@
 @props([
     'product',
-    'showBranch' => null,
     'showAddToCart' => false,
     'originalPrice' => null,
 ])
@@ -47,10 +46,7 @@
         <!-- Price -->
         <div class="mt-2">
             @php
-                $price = $showBranch
-                    ? $product->prices->firstWhere('branch_id', $showBranch)
-                    : $product->prices->first();
-                $displayPrice = $price?->price;
+                $displayPrice = $product->price;
                 $hasPromo = $originalPrice && $displayPrice && $originalPrice > $displayPrice;
             @endphp
             @if($displayPrice)

@@ -146,28 +146,6 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        {{-- ===== BRANCH SELECTOR ===== --}}
-        <div class="mb-4">
-            <label class="block text-xs font-medium text-neutral-600 mb-2">Pilih Cabang:</label>
-            <div class="flex flex-wrap gap-2">
-                @php $branches = \App\Models\Branch::where('is_active', true)->get(); @endphp
-                @foreach($branches as $branch)
-                    <a href="{{ request()->fullUrlWithQuery(['cabang' => $branch->id]) }}"
-                       class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-h-[44px]
-                              {{ ($selectedBranch ?? $branches->first()->id) === $branch->id
-                                  ? 'bg-primary-700 text-white shadow-sm'
-                                  : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300 hover:text-primary-700' }}">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        {{ $branch->name }}
-                        <span class="text-[10px] opacity-70 hidden sm:inline">({{ $branch->code }})</span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-
         {{-- ===== HERO BANNER (guest only) ===== --}}
         @guest
         <div class="bg-white rounded-xl border border-neutral-100 shadow-sm p-6 sm:p-8 mb-6">
@@ -279,17 +257,16 @@
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
             @forelse ($featuredProducts as $product)
-                <div>
-                    @php
+                <div>                        @php
                         // Simulasi harga promo (nanti dari DB)
-                        $originalPrice = $product->prices->first()?->price;
+                        $originalPrice = $product->price;
                         if ($originalPrice && $loop->index < 2) {
                             $originalPrice = round($originalPrice * 1.15 / 100) * 100; // 15% di atas harga promo
                         } else {
                             $originalPrice = null;
                         }
                     @endphp
-                    <x-product-card :product="$product" :showBranch="$selectedBranch" showAddToCart="true" :originalPrice="$originalPrice">
+                    <x-product-card :product="$product" showAddToCart="true" :originalPrice="$originalPrice">
                         @if($originalPrice)
                             <x-promo-badge text="Promo" class="!absolute top-2 right-2" />
                         @endif

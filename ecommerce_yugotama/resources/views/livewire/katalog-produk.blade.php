@@ -43,27 +43,6 @@
         <h1 class="text-lg sm:text-xl font-heading font-bold text-neutral-900 mb-1">Katalog Produk</h1>
         <p class="text-xs sm:text-sm text-neutral-500 mb-4">Temukan produk kebutuhan Anda dengan harga terbaik</p>
 
-        <!-- Branch Selector -->
-        <div class="mb-4">
-            <label class="block text-xs font-medium text-neutral-600 mb-2">Pilih Cabang:</label>
-            <div class="flex flex-wrap gap-2">
-                @foreach($branches as $branch)
-                    <button wire:click="selectBranch({{ $branch->id }})"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-h-[44px]
-                                   {{ $branchId === $branch->id
-                                       ? 'bg-primary-700 text-white shadow-sm'
-                                       : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300 hover:text-primary-700' }}">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        {{ $branch->name }}
-                        <span class="text-[10px] opacity-70 hidden sm:inline">({{ $branch->code }})</span>
-                    </button>
-                @endforeach
-            </div>
-        </div>
-
         <!-- Category Filter Pills (horizontal scroll) -->
         <div class="mb-4 overflow-x-auto scrollbar-hide -mx-4 px-4">
             <div class="flex gap-2 pb-1 min-w-max">
@@ -92,7 +71,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                 @foreach($products as $product)
                     <div wire:key="product-{{ $product->id }}">
-                        <x-product-card :product="$product" :showBranch="$branchId" showAddToCart="true">
+                        <x-product-card :product="$product" showAddToCart="true">
                             <x-promo-badge text="Promo" class="!absolute top-2 right-2" />
                         </x-product-card>
                     </div>

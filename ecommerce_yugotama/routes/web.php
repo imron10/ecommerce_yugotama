@@ -7,14 +7,9 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    // Branch selection
-    $branches = \App\Models\Branch::where('is_active', true)->get();
-    $selectedBranch = request()->query('cabang', $branches->first()?->id);
-
-    $featuredProducts = Product::with([
-        'category',
-        'prices' => fn ($q) => $q->where('branch_id', $selectedBranch),
-    ])->where('is_active', true)
+    $featuredProducts = Product::with('category')
+        ->where('is_active', true)
+        ->whereNotNull('price')
         ->inRandomOrder()
         ->limit(8)
         ->get();
@@ -24,17 +19,17 @@ Route::get('/', function () {
         ->having('products_count', '>', 0)
         ->get();
 
-    return view('welcome', compact('featuredProducts', 'categories', 'selectedBranch'));
+    return view('welcome', compact('featuredProducts', 'categories'));
 });
 
 Route::get('/produk', KatalogProduk::class)->name('produk.katalog');
 
 
 Route::get('/dashboard', function () {
-    if (auth()->user()->role !== 'admin') {
-        return redirect()->route('produk.katalog');
+    if (auth()->user()->role === 'admin') {
+        return view('dashboard');
     }
-    return view('dashboard');
+    return view('dashboard-buyer');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

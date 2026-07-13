@@ -9,13 +9,28 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@yugotama.com'],
+            [
+                'name' => 'Admin Toko',
+                'password' => bcrypt('password123'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => bcrypt('password123'),
+                'role' => 'buyer',
+            ]
+        );
 
         $this->call([
-            BranchSeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class,
+            // Note: PromoSeeder & OrderSeeder akan diaktifkan di fase terkait (Fase 1+)
         ]);
     }
 }
